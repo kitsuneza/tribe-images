@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Escape Room Lock</title>
+<style>
+:root{--bg:#0f1220;--card:#14182b;--accent:#4fd1c5;--text:#e6eaf2;--muted:#9aa3b2}
+*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:radial-gradient(1000px 700px at 50% -10%,#1a2040 0,var(--bg) 60%)}
+.wrap{min-height:100%;display:grid;place-items:center;padding:24px}
+.card{width:min(640px,96vw);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:22px 20px;backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.appbar{display:flex;align-items:center;gap:10px;margin-bottom:10px}.dot{width:10px;height:10px;border-radius:50%;background:#fc5753;box-shadow:16px 0 0 #fdbc40,32px 0 0 #34c84a;opacity:.9}
+h1{margin:6px 0 2px;font-size:20px;font-weight:700;letter-spacing:.3px}p.sub{margin:0 0 18px;color:var(--muted);font-size:14px}
+.field{display:flex;gap:10px}
+input[type="password"],input[type="tel"]{flex:1;font-size:18px;padding:14px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#0e1224;color:var(--text);outline:none}
+input::placeholder{color:#71809a}button{appearance:none;border:0;border-radius:12px;padding:14px 18px;font-size:16px;font-weight:700;background:linear-gradient(180deg,#55e0d3,#2cb6aa);color:#0b111e;cursor:pointer;min-width:110px}
+button:active{transform:translateY(1px)}.msg{min-height:22px;margin-top:12px;font-size:14px;color:#ff8080}.ok{color:#8ff7cc}.shake{animation:shake .28s linear 1}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hidden{display:none !important}.reveal{text-align:center}
+.frameWrap{background:#0b0f1e;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:10px}
+.frameWrap iframe{width:100%;height:60vh;border:0;border-radius:12px;background:#0b0f1e}
+.hint{margin-top:10px;font-size:12px;color:var(--muted)}
+.linkbtn{display:inline-block;margin-top:10px;padding:10px 14px;border-radius:10px;background:#2cb6aa;color:#0b111e;font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- LOCK -->
+  <section id="lock" class="card" role="region" aria-label="Password Gate">
+    <div class="appbar"><div class="dot"></div></div>
+    <h1>Access Required</h1>
+    <p class="sub">Enter the passcode to unlock.</p>
+    <form id="form" autocomplete="off">
+      <div class="field">
+        <input id="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="Enter 6-digit code" type="password" aria-label="Passcode"/>
+        <button type="submit" aria-label="Unlock">Unlock</button>
+      </div>
+      <div id="msg" class="msg" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <!-- REVEAL -->
+  <section id="reveal" class="card hidden" role="region" aria-label="Unlocked Content">
+    <div class="appbar"><div class="dot"></div></div>
+    <div class="reveal">
+      <h2>Unlocked</h2>
+      <div class="frameWrap">
+        <!-- Embed the new Drive file via preview -->
+        <iframe src="https://drive.google.com/file/d/1LG7uZZqzj-dMsRcXpeQzdpwO0sZ05Ki0/preview" allow="autoplay"></iframe>
+      </div>
+      <a class="linkbtn" target="_blank" rel="noopener"
+         href="https://drive.google.com/file/d/1LG7uZZqzj-dMsRcXpeQzdpwO0sZ05Ki0/view?usp=sharing">Open in Google Drive</a>
+      <p class="hint">If the preview says “Permission required”, tap the button above — it’s a cookie/auth issue on iPad, not your link.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const SECRET = "233444";
+  const failMsgs = [
+    "wrong password",
+    "That's not right either",
+    "Are you just guessing?",
+    "Try not to be too literal...think about escape rooms",
+    "Eri might actually know this specific one"
+  ];
+  let attempts = 0;
+
+  const form = document.getElementById("form");
+  const code = document.getElementById("code");
+  const msg  = document.getElementById("msg");
+  const lock = document.getElementById("lock");
+  const reveal = document.getElementById("reveal");
+
+  setTimeout(()=>code.focus(),200);
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    const val = (code.value||"").trim();
+    if (val === SECRET) {
+      msg.textContent = "Access granted.";
+      msg.className = "msg ok";
+      setTimeout(()=>{ lock.classList.add("hidden"); reveal.classList.remove("hidden"); },180);
+    } else {
+      attempts++;
+      const idx = Math.min(attempts-1, failMsgs.length-1);
+      msg.textContent = failMsgs[idx];
+      msg.className = "msg";
+      lock.classList.remove("shake"); void lock.offsetWidth; lock.classList.add("shake");
+      code.select();
+    }
+  });
+})();
+</script>
+</body></html>
